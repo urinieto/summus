@@ -81,7 +81,7 @@ def compute_features(audio_file, type=PCP_TYPE):
 
     elif type == TONNETZ_TYPE:
         logging.info("Computing Tonnetz...")
-        features["sequence"] = librosa.feature.tonnetz(y=y_harmonic, sr=sr)
+        features["sequence"] = librosa.feature.tonnetz(y=y_harmonic, sr=sr).T
 
     elif type == MFCC_TYPE:
         logging.info("Computing Spectrogram...")
