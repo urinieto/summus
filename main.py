@@ -121,8 +121,17 @@ def compute_compression_measure(sequence, summary):
     compression : float >= 0
         The compression measure
     """
-    # TODO
-    pass
+    # If the summary is empty, the compression should be empty
+    if len(summary) == 0:
+        return 0
+
+    # Make sure that the dimensions are correct
+    assert sequence.shape[1] == summary[0].shape[1]
+
+    for subsequence in summary:
+        for i in xrange(sequence.shape[0]):
+            #TODO
+            pass
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
