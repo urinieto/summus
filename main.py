@@ -59,6 +59,18 @@ def compute_beats(y_percussive, sr=22050):
 def compute_features(audio_file, type=PCP_TYPE):
     """
     Computes the audio features from a given audio file.
+
+    Parameters
+    ----------
+    audio_file : str
+        Path to the input audio file.
+    type : str
+        Feature type identification (must be one of the FEATURE_TYPES).
+
+    Returns
+    -------
+    features : dict
+        The desired features, including beat-synchronous features.
     """
     # Sanity check
     assert type in FEATURE_TYPES, "Incorrect features"
