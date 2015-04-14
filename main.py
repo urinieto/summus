@@ -194,7 +194,7 @@ def make_shingles(subsequence, L):
     return shingles
 
 
-def compute_average_min_dist(shingles1, shingles2):
+def compute_avg_min_dist(shingles1, shingles2):
     """Computes the averaged minimum Euclidean distance between two sets of
     shingles.
 
@@ -219,6 +219,7 @@ def compute_average_min_dist(shingles1, shingles2):
 
     # Get fixed parameters
     L = shingles1[0].shape[0]
+    K = len(shingles1)
 
     # Find average minimum distance
     avg_min_dist = 0
@@ -228,10 +229,11 @@ def compute_average_min_dist(shingles1, shingles2):
             dist = distance.sqeuclidean(shingle1, shingle2) / float(L)
             if dist < min_dist:
                 min_dist = dist
-        avg_min_dist += dist
-    avg_min_dist = np.sqrt(avg_min_dist)
+        print min_dist
+        avg_min_dist += min_dist
 
-    return avg_min_dist
+    # Square and normalize
+    return np.sqrt(avg_min_dist) / float(K)
 
 
 if __name__ == '__main__':
