@@ -163,6 +163,77 @@ def compute_compression_measure(sequence, summary):
     return 1 - dist / float(P * J)
 
 
+def make_shingles(subsequence, L):
+    """Transforms the given subsequence into a list of L-length shingles.
+
+    Parameters
+    ----------
+    subsequence : np.array(N, n_features)
+        A given subsequence of the track.
+    L : int > 0 < N
+        The length of each shingle.
+
+    Returns
+    -------
+    shingles : list
+        List of np.array(L, n_features) representing the shingles.
+    """
+    # Get sizes
+    N = subsequence.shape[0]
+    K = N - L + 1
+
+    # Some sanity checks
+    assert N > 0
+    assert N >= L
+
+    # Make shingles
+    shingles = []
+    for i in xrange(K):
+        shingles.append(subsequence[i:i + L, :])
+
+    return shingles
+
+
+def compute_average_min_dist(shingles1, shingles2):
+    """Computes the averaged minimum Euclidean distance between two sets of
+    shingles.
+
+    Parameters
+    ----------
+    shingles1: list
+        List of np.arrays for a given subsequence.
+    shingles2: list
+        List of np.arrays for a given subsequence.
+
+    Returns
+    -------
+    min_dist : float > 0
+        Averaged minimum Euclidean distance between the two sets of shingles.
+    """
+    # Some sanity checks
+    assert len(shingles1) == len(shingles2)
+
+    # If shingle is empty, no distance exists
+    if len(shingles1) <= 0:
+        return None
+
+    # Get fixed parameters
+    L = shingles1[0].shape[0]
+
+    # Find average minimum distance
+    avg_min_dist = 0
+    for shingle1 in shingles1:
+        min_dist = np.inf
+        for shingle2 in shingles2:
+            dist = distance.sqeuclidean(shingle1, shingle2) / float(L)
+            if dist < min_dist:
+                min_dist = dist
+        avg_min_dist += dist
+    avg_min_dist = np.sqrt(avg_min_dist)
+
+    return avg_min_dist
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
         "Generates a music summary from a given audio file.",

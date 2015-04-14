@@ -13,6 +13,29 @@ import main
 AUDIO_DIR = os.path.join("..", "audio")
 
 
+def test_make_shingles():
+    def _test_shingles(N, n_features, L):
+        K = N - L + 1
+        subsequence = np.arange(N * n_features).reshape(N, n_features)
+        shingles = main.make_shingles(subsequence, L)
+        eq_(len(shingles), K, "The number of shingles is not correct")
+        eq_(shingles[0].shape[0], L, "The size of the shingles is not correct")
+        eq_(shingles[0].shape[1], n_features, "The number of features of the "
+            "shingles is not correct")
+    N = 8
+    n_features = 2
+    L = 3
+    _test_shingles(N, n_features, L)
+    N = 10
+    n_features = 4
+    L = 4
+    _test_shingles(N, n_features, L)
+    N = 1
+    n_features = 4
+    L = 1
+    _test_shingles(N, n_features, L)
+
+
 def test_compression_measure():
     # Check that a toy example actually returns perfect compression
     sequence = np.ones(20)[:, np.newaxis]
@@ -54,5 +77,3 @@ def test_compute_wrong_features():
     features = main.compute_features(audio_file, type="fail")
     if features:
         return  # This should not get executed
-
-
