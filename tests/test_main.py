@@ -1,14 +1,30 @@
 #!/usr/bin/env python
 """Unit Tests for the Music Summaries code."""
 
+import numpy as np
 import os
 import sys
+
 from nose.tools import eq_, raises
 
 sys.path.append("..")
 import main
 
 AUDIO_DIR = os.path.join("..", "audio")
+
+
+def test_compression_measure():
+    # Check that a toy example actually returns perfect compression
+    sequence = np.ones(20)[:, np.newaxis]
+    summary = [np.ones((3, 1))]
+    compression = main.compute_compression_measure(sequence, summary)
+    assert np.isclose(compression, 1.0)
+
+    # Check that a toy example actually returns zero compression
+    sequence = np.zeros(20)[:, np.newaxis]
+    summary = [np.ones((3, 1))]
+    compression = main.compute_compression_measure(sequence, summary)
+    assert np.isclose(compression, 0.0)
 
 
 def test_compute_features():
@@ -27,7 +43,7 @@ def test_compute_features():
     eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
         "number of coefficients")
 
-    # Check that all the features have the same length
+    # Check that all features have the same length
     assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
         tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
 
@@ -38,3 +54,5 @@ def test_compute_wrong_features():
     features = main.compute_features(audio_file, type="fail")
     if features:
         return  # This should not get executed
+
+

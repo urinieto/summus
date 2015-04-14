@@ -16,6 +16,8 @@ import numpy as np
 import os
 import time
 
+from scipy.spatial import distance
+
 import librosa
 
 # Analysis Globals
@@ -140,10 +142,26 @@ def compute_compression_measure(sequence, summary):
     # Make sure that the dimensions are correct
     assert sequence.shape[1] == summary[0].shape[1]
 
-    for subsequence in summary:
-        for i in xrange(sequence.shape[0]):
-            #TODO
-            pass
+    # Get the fixed parameters
+    P = len(summary)
+    N = summary[0].shape[0]
+    M = sequence.shape[0]
+    J = M - N + 1
+
+    # Make sure that the length of each subsequence of the summary is less
+    # than the whole track
+    assert M > N
+
+    # Compute the "convolutive" euclidean distance
+    dist = 0
+    for gamma in summary:
+        for i in xrange(J):
+            subsequence = sequence[i:i + N, :]
+            dist += distance.sqeuclidean(gamma, subsequence) / float(N)
+
+    # Normalize and transform to similarity
+    return 1 - dist / float(P * J)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
@@ -169,11 +187,6 @@ if __name__ == '__main__':
                         type=int,
                         help="Number of jobs (only for collection mode)",
                         default=4)
-    parser.add_argument("-ow",
-                        action="store_true",
-                        dest="overwrite",
-                        help="Overwrite the previously computed features",
-                        default=False)
     parser.add_argument("-d",
                         action="store",
                         dest="ds_name",
@@ -192,4 +205,3 @@ if __name__ == '__main__':
 
     # Done!
     logging.info("Done! Took %.2f seconds." % (time.time() - start_time))
-
