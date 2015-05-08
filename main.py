@@ -14,6 +14,7 @@ import argparse
 import logging
 import numpy as np
 import os
+import six
 import time
 
 from scipy.spatial import distance
@@ -155,7 +156,7 @@ def compute_compression_measure(sequence, summary):
     # Compute the "convolutive" euclidean distance
     dist = 0
     for gamma in summary:
-        for i in xrange(J):
+        for i in np.arange(J):
             subsequence = sequence[i:i + N, :]
             dist += distance.sqeuclidean(gamma, subsequence) / float(N)
 
@@ -188,7 +189,7 @@ def make_shingles(subsequence, L):
 
     # Make shingles
     shingles = []
-    for i in xrange(K):
+    for i in np.arange(K):
         shingles.append(subsequence[i:i + L, :])
 
     return shingles
@@ -229,7 +230,6 @@ def compute_avg_min_dist(shingles1, shingles2):
             dist = distance.sqeuclidean(shingle1, shingle2) / float(L)
             if dist < min_dist:
                 min_dist = dist
-        print min_dist
         avg_min_dist += min_dist
 
     # Square and normalize
