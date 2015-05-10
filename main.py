@@ -14,6 +14,7 @@ import argparse
 import itertools
 import functools
 import logging
+import matplotlib.pyplot as plt
 import numpy as np
 import operator
 import os
@@ -166,7 +167,8 @@ def compute_compression_measure(sequence, summary):
     for gamma in summary:
         for i in np.arange(J):
             subsequence = sequence[i:i + N, :]
-            dist += distance.sqeuclidean(gamma, subsequence) / float(N)
+            X = np.vstack((gamma.flatten(), subsequence.flatten()))
+            dist += distance.pdist(X, metric="sqeuclidean")[0] / float(N)
 
     # Normalize and transform to similarity
     return 1 - dist / float(P * J)
@@ -277,7 +279,8 @@ def compute_avg_min_dist(shingles1, shingles2):
     for shingle1 in shingles1:
         min_dist = np.inf
         for shingle2 in shingles2:
-            dist = distance.sqeuclidean(shingle1, shingle2) / float(L)
+            X = np.vstack((shingle1.flatten(), shingle2.flatten()))
+            dist = distance.pdist(X, metric="sqeuclidean")[0] / float(L)
             if dist < min_dist:
                 min_dist = dist
         avg_min_dist += min_dist
@@ -326,6 +329,15 @@ def find_optimal_summary(sequence, P, N, L=None):
         compressions[np.array(idx)] = c
         disjoints[np.array(idx)] = d
         criteria[np.array(idx)] = f_measure(c, d)
+
+    six.print_(np.argmax(criteria))
+    plt.imshow(criteria, interpolation="nearest")
+    plt.show()
+    plt.imshow(compressions, interpolation="nearest")
+    plt.show()
+    plt.imshow(disjoints, interpolation="nearest")
+    plt.show()
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
