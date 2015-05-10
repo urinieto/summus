@@ -285,29 +285,18 @@ if __name__ == '__main__':
     parser.add_argument("audio_file",
                         action="store",
                         help="Input audio file")
-    parser.add_argument("-o",
+    parser.add_argument("-P",
                         action="store",
-                        dest="out_file",
-                        type=str,
-                        help="Output file",
-                        default="summary.wav")
-    parser.add_argument("-s",
-                        action="store_true",
-                        dest="sonify_beats",
-                        help="Sonifies the estimated beats",
-                        default=False)
-    parser.add_argument("-j",
-                        action="store",
-                        dest="n_jobs",
+                        dest="P",
                         type=int,
-                        help="Number of jobs (only for collection mode)",
-                        default=4)
-    parser.add_argument("-d",
+                        help="Number of subsequences in summary",
+                        default=3)
+    parser.add_argument("-N",
                         action="store",
-                        dest="ds_name",
-                        default="*",
-                        help="The prefix of the dataset to use "
-                        "(e.g. Isophonics, SALAMI)")
+                        dest="N",
+                        type=int,
+                        help="Number of beats per subsequence",
+                        default=16)
     args = parser.parse_args()
     start_time = time.time()
 
