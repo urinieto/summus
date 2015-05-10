@@ -201,7 +201,7 @@ def compute_disjoint_information(summary, L=3):
             disjoint *= compute_avg_min_dist(shingles_i, shingles_j)
 
     # Normalize
-    disjoint = disjoint ** (2.0 / float(P * (P - 1)))
+    disjoint **= (2.0 / float(P * (P - 1)))
 
     return disjoint
 
