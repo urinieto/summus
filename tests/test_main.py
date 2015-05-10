@@ -15,12 +15,13 @@ AUDIO_DIR = os.path.join("..", "audio")
 
 
 def test_find_optimal_summary():
-    P = 3
-    N = 16
+    P = 2
+    N = 5
     L = int(N / 2)
-    M = 100
-    n_features = 12
-    sequence = np.random.random((M, n_features))
+    M = 10
+    n_features = 2
+    sequence = np.arange(M * n_features).reshape(M, n_features)
+    #sequence = np.random.random((M, n_features))
     main.find_optimal_summary(sequence, P, N, L=L)
 
 def test_disjoint_information():

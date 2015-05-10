@@ -11,8 +11,11 @@ Examples:
     TODO
 """
 import argparse
+import itertools
+import functools
 import logging
 import numpy as np
+import operator
 import os
 import six
 import time
@@ -33,6 +36,11 @@ PCP_TYPE = "pcp"
 TONNETZ_TYPE = "tonnetz"
 MFCC_TYPE = "mfcc"
 FEATURE_TYPES = [PCP_TYPE, TONNETZ_TYPE, MFCC_TYPE]
+
+
+def f_measure(precision, recall):
+    """Computes the harmonic mean between precision and recall."""
+    return 2 * precision * recall / (precision + recall)
 
 
 def compute_beats(y_percussive, sr=22050):
@@ -302,6 +310,22 @@ def find_optimal_summary(sequence, P, N, L=None):
     compressions = np.zeros(P * (M, ))
     criteria = np.zeros(P * (M, ))
 
+    # Get all the possible subsequences (shingles)
+    subsequences = make_shingles(sequence, N)
+    n = len(subsequences)
+
+    # Get all possible P combinations
+    combs = itertools.combinations(subsequences, P)
+    combs_idxs = itertools.combinations(np.arange(n), P)
+
+    # Compute measures
+    for comb, idx in zip(combs, combs_idxs):
+        summary = list(comb)
+        c = compute_compression_measure(sequence, summary)
+        d = compute_disjoint_information(summary, L)
+        compressions[np.array(idx)] = c
+        disjoints[np.array(idx)] = d
+        criteria[np.array(idx)] = f_measure(c, d)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=
