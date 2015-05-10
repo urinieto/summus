@@ -18,7 +18,7 @@ def test_find_optimal_summary():
     P = 2
     N = 5
     L = int(N / 2)
-    M = 40
+    M = 100
     n_features = 12
     sequence = np.arange(M * n_features).reshape(M, n_features)
     #sequence = np.random.random((M, n_features))

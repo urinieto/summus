@@ -326,9 +326,9 @@ def find_optimal_summary(sequence, P, N, L=None):
         summary = list(comb)
         c = compute_compression_measure(sequence, summary)
         d = compute_disjoint_information(summary, L)
-        compressions[np.array(idx)] = c
-        disjoints[np.array(idx)] = d
-        criteria[np.array(idx)] = f_measure(c, d)
+        compressions[idx] = c
+        disjoints[idx] = d
+        criteria[idx] = f_measure(c, d)
 
     six.print_(np.argmax(criteria))
     plt.imshow(criteria, interpolation="nearest")
