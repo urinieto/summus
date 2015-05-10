@@ -330,13 +330,14 @@ def find_optimal_summary(sequence, P, N, L=None):
         disjoints[idx] = d
         criteria[idx] = f_measure(c, d)
 
-    six.print_(np.argmax(criteria))
-    plt.imshow(criteria, interpolation="nearest")
-    plt.show()
-    plt.imshow(compressions, interpolation="nearest")
-    plt.show()
-    plt.imshow(disjoints, interpolation="nearest")
-    plt.show()
+    max_index = np.unravel_index(criteria.argmax(), criteria.shape)
+    six.print_(max_index)
+    #plt.imshow(criteria, interpolation="nearest")
+    #plt.show()
+    #plt.imshow(compressions, interpolation="nearest")
+    #plt.show()
+    #plt.imshow(disjoints, interpolation="nearest")
+    #plt.show()
 
 
 if __name__ == '__main__':
