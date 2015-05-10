@@ -164,7 +164,7 @@ def compute_compression_measure(sequence, summary):
     return 1 - dist / float(P * J)
 
 
-def compute_disjoint_information(summary, L=3):
+def compute_disjoint_information(summary, L):
     """Computes the disjoint information measure.
 
     Parameters
@@ -276,6 +276,31 @@ def compute_avg_min_dist(shingles1, shingles2):
 
     # Normalize
     return avg_min_dist / float(K)
+
+
+def find_optimal_summary(sequence, P, N, L=None):
+    """Identifies the optimal summary of the sequence.
+
+    Parameters
+    ----------
+    sequence : np.array(M, n_features)
+        Representation of the audio track.
+    P : int > 0
+        Number of subsequences in the summary.
+    N : int > 0
+        Numnber of beats per subsequence.
+    L : int > 0 < N
+        Length of the shingles (If None, L = N / 2)
+    """
+    # Sanity checks
+    assert len(sequence) > N
+
+    M = len(sequence)
+
+    # Create tensors to store the two measures
+    disjoints = np.zeros(P * (M, ))
+    compressions = np.zeros(P * (M, ))
+    criteria = np.zeros(P * (M, ))
 
 
 if __name__ == '__main__':
