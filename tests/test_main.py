@@ -14,6 +14,18 @@ import main
 AUDIO_DIR = os.path.join("..", "audio")
 
 
+#def test_disjoint_information():
+    #L = 3
+    #P = 4
+    #N = 10
+    #summary = []
+    #for i in np.arange(P):
+        #summary.append(np.arange(N).reshape(N, 1) + 10*i)
+    #six.print_(summary)
+    #disjoint = main.compute_disjoint_information(summary, L=L)
+    #six.print_(disjoint)
+
+
 def test_avg_min_dist():
     def _test_avg_min_dist(sub1, sub2, L, result):
         shingles1 = main.make_shingles(sub1, L)
@@ -23,14 +35,14 @@ def test_avg_min_dist():
 
     L = 3
     N = 10
-    sub1 = np.arange(N).reshape(N, 1)
-    sub2 = np.arange(N).reshape(N, 1) + 1
-    _test_avg_min_dist(sub1, sub2, L, 1 / 8.)
+    sub1 = np.arange(N).reshape(N, 1) / float(N + 1)
+    sub2 = (np.arange(N).reshape(N, 1) + 1) / float(N + 1)
+    _test_avg_min_dist(sub1, sub2, L, 0.0113636)
     L = 4
     N = 10
-    sub1 = np.arange(N).reshape(N, 1)
-    sub2 = np.arange(N).reshape(N, 1) + 100
-    _test_avg_min_dist(sub1, sub2, L, 36.6703)
+    sub1 = np.arange(N).reshape(N, 1) / float(N + 100)
+    sub2 = (np.arange(N).reshape(N, 1) + 100) / float(N + 100)
+    _test_avg_min_dist(sub1, sub2, L, 0.33336678)
 
 
 def test_make_shingles():
@@ -70,25 +82,25 @@ def test_compression_measure():
     assert np.isclose(compression, 0.0)
 
 
-def test_compute_features():
-    audio_file = os.path.join(AUDIO_DIR, "sines.ogg")
+#def test_compute_features():
+    #audio_file = os.path.join(AUDIO_DIR, "sines.ogg")
 
-    # Chromagram
-    chroma = main.compute_features(audio_file, main.PCP_TYPE)
-    eq_(chroma["sequence"].shape[1], 12, "Chromagram is not 12-dimensional")
+    ## Chromagram
+    #chroma = main.compute_features(audio_file, main.PCP_TYPE)
+    #eq_(chroma["sequence"].shape[1], 12, "Chromagram is not 12-dimensional")
 
-    # Tonnetz
-    tonnetz = main.compute_features(audio_file, main.TONNETZ_TYPE)
-    eq_(tonnetz["sequence"].shape[1], 6, "Tonnetz is not 6-dimensional")
+    ## Tonnetz
+    #tonnetz = main.compute_features(audio_file, main.TONNETZ_TYPE)
+    #eq_(tonnetz["sequence"].shape[1], 6, "Tonnetz is not 6-dimensional")
 
-    # MFCC
-    mfcc = main.compute_features(audio_file, main.MFCC_TYPE)
-    eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
-        "number of coefficients")
+    ## MFCC
+    #mfcc = main.compute_features(audio_file, main.MFCC_TYPE)
+    #eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
+        #"number of coefficients")
 
-    # Check that all features have the same length
-    assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
-        tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
+    ## Check that all features have the same length
+    #assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
+        #tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
 
 
 @raises(AssertionError)

@@ -164,6 +164,49 @@ def compute_compression_measure(sequence, summary):
     return 1 - dist / float(P * J)
 
 
+def compute_disjoint_information(summary, L=3):
+    """Computes the disjoint information measure.
+
+    Parameters
+    ----------
+    summary : list
+        List of P np.arrays of shape (N, n_features)
+    L : int > 0 < N
+        The length of each shingle.
+
+    Returns
+    -------
+    disjoint : float >= 0
+        The disjoint information measure
+    """
+
+    # Sanity checks
+    assert len(summary) > 0
+    P = len(summary)
+    N = len(summary[0])
+    assert L < N
+    for subsequence in summary:
+        assert N == len(subsequence)
+
+    # If there's only one subsequence in the summary, return maximum measure
+    if P == 1:
+        return 1.0
+
+    # Compute the measure
+    disjoint = 1
+    for i in np.arange(P):
+        for j in np.arange(i + 1, P):
+            shingles_i = make_shingles(summary[i], L)
+            shingles_j = make_shingles(summary[j], L)
+            disjoint *= compute_avg_min_dist(shingles_i, shingles_j)
+            six.print_(disjoint, compute_avg_min_dist(shingles_i, shingles_j))
+
+    # Normalize
+    disjoint = disjoint ** (2.0 / float(P * (P - 1)))
+
+    return disjoint
+
+
 def make_shingles(subsequence, L):
     """Transforms the given subsequence into a list of L-length shingles.
 
