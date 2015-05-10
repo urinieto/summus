@@ -14,16 +14,22 @@ import main
 AUDIO_DIR = os.path.join("..", "audio")
 
 
-#def test_disjoint_information():
-    #L = 3
-    #P = 4
-    #N = 10
-    #summary = []
-    #for i in np.arange(P):
-        #summary.append(np.arange(N).reshape(N, 1) + 10*i)
-    #six.print_(summary)
-    #disjoint = main.compute_disjoint_information(summary, L=L)
-    #six.print_(disjoint)
+def test_disjoint_information():
+    L = 3
+    N = 10
+    summary = []
+    summary.append(np.zeros(N).reshape(N, 1))
+    summary.append(np.ones(N).reshape(N, 1))
+    disjoint = main.compute_disjoint_information(summary, L=L)
+    assert np.isclose(disjoint, 1.0)
+
+    L = 3
+    N = 10
+    summary = []
+    summary.append(np.zeros(N).reshape(N, 1))
+    summary.append(np.zeros(N).reshape(N, 1))
+    disjoint = main.compute_disjoint_information(summary, L=L)
+    assert np.isclose(disjoint, 0.0)
 
 
 def test_avg_min_dist():
@@ -37,12 +43,12 @@ def test_avg_min_dist():
     N = 10
     sub1 = np.arange(N).reshape(N, 1) / float(N + 1)
     sub2 = (np.arange(N).reshape(N, 1) + 1) / float(N + 1)
-    _test_avg_min_dist(sub1, sub2, L, 0.0113636)
+    _test_avg_min_dist(sub1, sub2, L, 0.001033057)
     L = 4
     N = 10
     sub1 = np.arange(N).reshape(N, 1) / float(N + 100)
     sub2 = (np.arange(N).reshape(N, 1) + 100) / float(N + 100)
-    _test_avg_min_dist(sub1, sub2, L, 0.33336678)
+    _test_avg_min_dist(sub1, sub2, L, 0.77793388)
 
 
 def test_make_shingles():

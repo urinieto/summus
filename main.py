@@ -199,7 +199,6 @@ def compute_disjoint_information(summary, L=3):
             shingles_i = make_shingles(summary[i], L)
             shingles_j = make_shingles(summary[j], L)
             disjoint *= compute_avg_min_dist(shingles_i, shingles_j)
-            six.print_(disjoint, compute_avg_min_dist(shingles_i, shingles_j))
 
     # Normalize
     disjoint = disjoint ** (2.0 / float(P * (P - 1)))
@@ -275,8 +274,8 @@ def compute_avg_min_dist(shingles1, shingles2):
                 min_dist = dist
         avg_min_dist += min_dist
 
-    # Square and normalize
-    return np.sqrt(avg_min_dist) / float(K)
+    # Normalize
+    return avg_min_dist / float(K)
 
 
 if __name__ == '__main__':
