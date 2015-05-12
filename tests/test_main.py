@@ -18,7 +18,7 @@ def test_find_optimal_summary():
     P = 3
     N = 5
     L = int(N / 2)
-    M = 300
+    M = 30
     n_features = 12
     sequence = np.arange(M * n_features).reshape(M, n_features)
     #sequence = np.random.random((M, n_features))
@@ -98,25 +98,25 @@ def test_compression_measure():
     assert np.isclose(compression, 0.0)
 
 
-#def test_compute_features():
-    #audio_file = os.path.join(AUDIO_DIR, "sines.ogg")
+def test_compute_features():
+    audio_file = os.path.join(AUDIO_DIR, "sines.ogg")
 
-    ## Chromagram
-    #chroma = main.compute_features(audio_file, main.PCP_TYPE)
-    #eq_(chroma["sequence"].shape[1], 12, "Chromagram is not 12-dimensional")
+    # Chromagram
+    chroma, audio = main.compute_features(audio_file, main.PCP_TYPE)
+    eq_(chroma["sequence"].shape[1], 12, "Chromagram is not 12-dimensional")
 
-    ## Tonnetz
-    #tonnetz = main.compute_features(audio_file, main.TONNETZ_TYPE)
-    #eq_(tonnetz["sequence"].shape[1], 6, "Tonnetz is not 6-dimensional")
+    # Tonnetz
+    tonnetz, audio = main.compute_features(audio_file, main.TONNETZ_TYPE)
+    eq_(tonnetz["sequence"].shape[1], 6, "Tonnetz is not 6-dimensional")
 
-    ## MFCC
-    #mfcc = main.compute_features(audio_file, main.MFCC_TYPE)
-    #eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
-        #"number of coefficients")
+    # MFCC
+    mfcc, audio = main.compute_features(audio_file, main.MFCC_TYPE)
+    eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
+        "number of coefficients")
 
-    ## Check that all features have the same length
-    #assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
-        #tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
+    # Check that all features have the same length
+    assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
+        tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
 
 
 @raises(AssertionError)

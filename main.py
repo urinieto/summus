@@ -84,6 +84,8 @@ def compute_features(audio_file, type=PCP_TYPE):
     -------
     features : dict
         The desired features, including beat-synchronous features.
+    audio : np.array
+        The samples of the audio
     """
     # Sanity check
     assert type in FEATURE_TYPES, "Incorrect features"
@@ -128,7 +130,7 @@ def compute_features(audio_file, type=PCP_TYPE):
     features["bs_sequence"] = librosa.feature.sync(features["sequence"].T,
                                                    features["beats_idx"],
                                                    pad=False).T
-    return features
+    return features, audio
 
 
 def compute_compression_measure(sequence, summary):
@@ -337,7 +339,7 @@ def find_optimal_summary(sequence, P, N, L=None):
         criteria[idx] = f_measure(c, d)
 
     summary_idxs = np.unravel_index(criteria.argmax(), criteria.shape)
-    six.print_(summary_idxs)
+    #six.print_(summary_idxs)
     #plt.imshow(criteria, interpolation="nearest")
     #plt.show()
     #plt.imshow(compressions, interpolation="nearest")
@@ -346,6 +348,28 @@ def find_optimal_summary(sequence, P, N, L=None):
     #plt.show()
 
     return summary_idxs
+
+
+def synth_summary(audio, beats, summary_idxs, N):
+    """Synthesize the audio summary.
+
+    Parameters
+    ----------
+    audio : np.array
+        Samples of the audio, sampled at SAMPLING_RATE.
+    beats : np.array
+        Beat times of the audio.
+    summary_idxs : list
+        List of the starting beat indeces of the summary.
+    N : int
+        Number of beats of each subsequence of the summary.
+
+    Returns
+    -------
+    summary : np.array
+        Samples of the summary, sampled at SAMPLING_RATE.
+    """
+    pass
 
 
 def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
@@ -373,7 +397,7 @@ def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
         Samples of the final summary.
     """
     # Compute audio features
-    features = compute_features(audio_file, type=feature_type)
+    features, audio = compute_features(audio_file, type=feature_type)
 
     # Find summary
     if opt:
@@ -383,7 +407,7 @@ def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
         pass
 
     # Synthesize summary
-    summary = synth_summary(features, summary_idxs, N)
+    summary = synth_summary(audio, features["beats"], summary_idxs, N)
 
     # Save file if needed
     if out_file is not None:
