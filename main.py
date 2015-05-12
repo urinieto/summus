@@ -395,8 +395,7 @@ def synth_summary(audio, beats, summary_idxs, N, fade=1):
         summary = np.concatenate((
             summary, audio[start_end_samples[0]:start_end_samples[1]]))
 
-    # Flatten summary and return
-    return np.asarray(summary).flatten()
+    return summary
 
 
 def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
