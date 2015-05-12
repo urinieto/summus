@@ -375,7 +375,9 @@ def synth_summary(audio, beats, summary_idxs, N, fade=2):
     summary = np.empty(0)
     for i, idx in enumerate(summary_idxs):
         # Create Subsequence
-        subseq = Segment(beats[idx], beats[idx + N], sr=SAMPLING_RATE)
+        subseq = Segment(beats[idx + fade / 2], beats[idx + N - fade / 2],
+                         sr=SAMPLING_RATE)
+        subseq_audio = audio[subseq.start_sample:subseq.end_sample]
 
         # Create cross fade segments
         fade_in_seg = Segment(beats[np.max([0, idx - fade / 2])],
@@ -390,15 +392,16 @@ def synth_summary(audio, beats, summary_idxs, N, fade=2):
         fade_out = utils.generate_fade_audio(fade_out_seg, audio, is_out=True)
 
         if i == 0:
-            summary = fade_in
+            # Beginning of track
+            summary = np.concatenate((fade_in, subseq_audio))
         else:
-            summary[-fade_in_seg.n_samples:] += fade_in
+            # Middle of track
+            if fade_in_seg.n_samples > 0:
+                summary[-fade_in_seg.n_samples:] += fade_in
+            summary = np.concatenate((summary, subseq_audio))
 
-        summary = np.concatenate((
-            summary, audio[subseq.start_sample:subseq.end_sample]))
-
-        if i == len(summary_idxs) - 1:
-            summary = np.concatenate((summary, fade_out))
+        # End of subsequence
+        summary = np.concatenate((summary, fade_out))
 
     return summary
 

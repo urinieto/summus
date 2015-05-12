@@ -12,6 +12,7 @@ from scipy.io import wavfile
 
 sys.path.append("..")
 import main
+import utils
 
 AUDIO_DIR = os.path.join("..", "audio")
 
@@ -22,19 +23,23 @@ def test_synth_summary():
     features, audio = main.compute_features(audio_file, main.PCP_TYPE)
 
     # Generate random summary
-    summary_idxs = [2, 16, 32]
+    summary_idxs = [0, 16, 32]
     N = 16
     summary = main.synth_summary(audio, features["beats"], summary_idxs, N,
-                                 fade=2)
+                                 fade=0)
 
     # Check that it is correct
-    start_sample = librosa.time_to_samples([features["beats"][summary_idxs[0]]],
-                                           sr=main.SAMPLING_RATE)
-    #for i, summary_sample in enumerate(summary):
-        #assert np.isclose(audio[start_sample[0] + i], summary_sample)
+    start_sample = utils.time_to_sample(features["beats"][summary_idxs[0]],
+                                        sr=main.SAMPLING_RATE)
+    for i, summary_sample in enumerate(summary):
+        assert np.isclose(audio[start_sample + i], summary_sample)
 
     # Save file
     wavfile.write("out_sum.wav", main.SAMPLING_RATE, summary)
+
+    # Try with other fades
+    summary = main.synth_summary(audio, features["beats"], summary_idxs, N,
+                                 fade=8)
 
 
 def test_find_optimal_summary():
