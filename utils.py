@@ -70,4 +70,4 @@ def generate_fade_audio(fade_seg, audio, is_out):
     mask = np.arange(fade_seg.n_samples) / float(fade_seg.n_samples)
     if is_out:
         mask = 1 - mask
-
+    return audio[fade_seg.start_sample:fade_seg.end_sample] * mask

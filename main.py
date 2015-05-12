@@ -385,19 +385,9 @@ def synth_summary(audio, beats, summary_idxs, N, fade=2):
                               beats[np.min([n - 1, idx + N + fade / 2])],
                               sr=SAMPLING_RATE)
 
-        # Create fade in audio
-        fade_in_mask = np.arange(fade_in_seg.n_samples) / \
-            float(fade_in_seg.n_samples)
-        fade_in = \
-            audio[fade_in_seg.start_sample:fade_in_seg.end_sample] * \
-            fade_in_mask
-
-        # Create fade out audio
-        fade_out_mask = np.arange(fade_out_seg.n_samples) / \
-            float(fade_out_seg.n_samples)
-        fade_out = \
-            audio[fade_out_seg.start_sample:fade_out_seg.end_sample] \
-            * fade_out_mask
+        # Create fade in/out audio
+        fade_in = utils.generate_fade_audio(fade_in_seg, audio, is_out=False)
+        fade_out = utils.generate_fade_audio(fade_out_seg, audio, is_out=True)
 
         if i == 0:
             summary = fade_in
@@ -406,6 +396,9 @@ def synth_summary(audio, beats, summary_idxs, N, fade=2):
 
         summary = np.concatenate((
             summary, audio[subseq.start_sample:subseq.end_sample]))
+
+        if i == len(summary_idxs) - 1:
+            summary = np.concatenate((summary, fade_out))
 
     return summary
 
