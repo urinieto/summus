@@ -21,6 +21,7 @@ import os
 import six
 import time
 
+from scipy.io import wavfile
 from scipy.spatial import distance
 
 import librosa
@@ -302,6 +303,11 @@ def find_optimal_summary(sequence, P, N, L=None):
         Numnber of beats per subsequence.
     L : int > 0 < N
         Length of the shingles (If None, L = N / 2)
+
+    Returns
+    -------
+    summary_idxs : list (len == P)
+        List of indeces of starting points of the summary.
     """
     # Sanity checks
     assert len(sequence) > N
@@ -330,14 +336,61 @@ def find_optimal_summary(sequence, P, N, L=None):
         disjoints[idx] = d
         criteria[idx] = f_measure(c, d)
 
-    max_index = np.unravel_index(criteria.argmax(), criteria.shape)
-    six.print_(max_index)
+    summary_idxs = np.unravel_index(criteria.argmax(), criteria.shape)
+    six.print_(summary_idxs)
     #plt.imshow(criteria, interpolation="nearest")
     #plt.show()
     #plt.imshow(compressions, interpolation="nearest")
     #plt.show()
     #plt.imshow(disjoints, interpolation="nearest")
     #plt.show()
+
+    return summary_idxs
+
+
+def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
+                     opt=False, out_file=None):
+    """Generates the summary of a given audio file.
+
+    Parameters
+    ----------
+    audio_file : str
+        Path to the input audio file.
+    P : int > 0
+        Number of subsequences in the summary.
+    N : int > 0
+        Numnber of beats per subsequence.
+    L : int > 0 < N
+        Length of the shingles (If None, L = N / 2)
+    opt : bool
+        Whether to use the optimal or the heuristic method.
+    out_file : str
+        Path to the output summary audio file (None to not save output).
+
+    Returns
+    -------
+    summary : np.array
+        Samples of the final summary.
+    """
+    # Compute audio features
+    features = compute_features(audio_file, type=feature_type)
+
+    # Find summary
+    if opt:
+        summary_idxs = find_optimal_summary(features["bs_sequence"], P, N, L)
+    else:
+        #TODO
+        pass
+
+    # Synthesize summary
+    summary = synth_summary(features, summary_idxs, N)
+
+    # Save file if needed
+    if out_file is not None:
+        #TODO
+        pass
+
+    return summary
 
 
 if __name__ == '__main__':
