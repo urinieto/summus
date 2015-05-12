@@ -41,11 +41,24 @@ FEATURE_TYPES = [PCP_TYPE, TONNETZ_TYPE, MFCC_TYPE]
 
 
 def f_measure(precision, recall):
-    """Computes the harmonic mean between precision and recall."""
+    """Computes the harmonic mean between precision and recall.
+
+    Parameters
+    ----------
+    precision : float > 0 < 1
+        Precision value.
+    recall : float > 0 < 1
+        Recall value.
+
+    Returns
+    -------
+    f_measure : float > 0 < 1
+        Harmonic mean between precision and recall.
+    """
     return 2 * precision * recall / (precision + recall)
 
 
-def compute_beats(y_percussive, sr=22050):
+def compute_beats(y_percussive, sr):
     """Computes the beats using librosa.
 
     Parameters
@@ -350,7 +363,7 @@ def find_optimal_summary(sequence, P, N, L=None):
     return summary_idxs
 
 
-def synth_summary(audio, beats, summary_idxs, N):
+def synth_summary(audio, beats, summary_idxs, N, fade=1):
     """Synthesize the audio summary.
 
     Parameters
@@ -363,13 +376,27 @@ def synth_summary(audio, beats, summary_idxs, N):
         List of the starting beat indeces of the summary.
     N : int
         Number of beats of each subsequence of the summary.
+    fade : int
+        Number of beats of cross-fading.
 
     Returns
     -------
     summary : np.array
         Samples of the summary, sampled at SAMPLING_RATE.
     """
-    pass
+    #TODO: cross-fade
+    summary = np.empty(0)
+    for idx in summary_idxs:
+        start_time = beats[idx]
+        end_time = beats[idx+N]
+        start_end_samples = librosa.time_to_samples(np.array([start_time,
+                                                              end_time]),
+                                                    sr=SAMPLING_RATE)
+        summary = np.concatenate((
+            summary, audio[start_end_samples[0]:start_end_samples[1]]))
+
+    # Flatten summary and return
+    return np.asarray(summary).flatten()
 
 
 def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
@@ -411,8 +438,7 @@ def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
 
     # Save file if needed
     if out_file is not None:
-        #TODO
-        pass
+        wavfile.write(out_file, main.SAMPLING_RATE, summary)
 
     return summary
 

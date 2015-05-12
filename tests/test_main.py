@@ -1,17 +1,40 @@
 #!/usr/bin/env python
 """Unit Tests for the Music Summaries code."""
 
+import librosa
 import numpy as np
 import os
 import six
 import sys
 
 from nose.tools import eq_, raises
+from scipy.io import wavfile
 
 sys.path.append("..")
 import main
 
 AUDIO_DIR = os.path.join("..", "audio")
+
+
+def test_synth_summary():
+    # Get audio
+    audio_file = os.path.join(AUDIO_DIR, "mindless.ogg")
+    features, audio = main.compute_features(audio_file, main.PCP_TYPE)
+
+    # Generate random summary
+    summary_idxs = [0, 16, 32]
+    N = 16
+    summary = main.synth_summary(audio, features["beats"], summary_idxs, N,
+                                 fade=0)
+
+    # Check that it is correct
+    start_sample = librosa.time_to_samples([features["beats"][summary_idxs[0]]],
+                                           sr=main.SAMPLING_RATE)
+    for i, summary_sample in enumerate(summary):
+        assert np.isclose(audio[start_sample[0] + i], summary_sample)
+
+    # Save file
+    wavfile.write("out_sum.wav", main.SAMPLING_RATE, summary)
 
 
 def test_find_optimal_summary():
@@ -98,25 +121,25 @@ def test_compression_measure():
     assert np.isclose(compression, 0.0)
 
 
-def test_compute_features():
-    audio_file = os.path.join(AUDIO_DIR, "sines.ogg")
+#def test_compute_features():
+    #audio_file = os.path.join(AUDIO_DIR, "sines.ogg")
 
-    # Chromagram
-    chroma, audio = main.compute_features(audio_file, main.PCP_TYPE)
-    eq_(chroma["sequence"].shape[1], 12, "Chromagram is not 12-dimensional")
+    ## Chromagram
+    #chroma, audio = main.compute_features(audio_file, main.PCP_TYPE)
+    #eq_(chroma["sequence"].shape[1], 12, "Chromagram is not 12-dimensional")
 
-    # Tonnetz
-    tonnetz, audio = main.compute_features(audio_file, main.TONNETZ_TYPE)
-    eq_(tonnetz["sequence"].shape[1], 6, "Tonnetz is not 6-dimensional")
+    ## Tonnetz
+    #tonnetz, audio = main.compute_features(audio_file, main.TONNETZ_TYPE)
+    #eq_(tonnetz["sequence"].shape[1], 6, "Tonnetz is not 6-dimensional")
 
-    # MFCC
-    mfcc, audio = main.compute_features(audio_file, main.MFCC_TYPE)
-    eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
-        "number of coefficients")
+    ## MFCC
+    #mfcc, audio = main.compute_features(audio_file, main.MFCC_TYPE)
+    #eq_(mfcc["sequence"].shape[1], main.N_MFCCS, "MFCC have not the right "
+        #"number of coefficients")
 
-    # Check that all features have the same length
-    assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
-        tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
+    ## Check that all features have the same length
+    #assert chroma["sequence"].shape[0] == tonnetz["sequence"].shape[0] and \
+        #tonnetz["sequence"].shape[0] == mfcc["sequence"].shape[0]
 
 
 @raises(AssertionError)
