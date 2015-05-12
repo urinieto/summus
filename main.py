@@ -12,11 +12,9 @@ Examples:
 """
 import argparse
 import itertools
-import functools
 import logging
 import matplotlib.pyplot as plt
 import numpy as np
-import operator
 import os
 import six
 import time
@@ -25,6 +23,8 @@ from scipy.io import wavfile
 from scipy.spatial import distance
 
 import librosa
+from utils import Segment
+import utils
 
 # Analysis Globals
 FFT_SIZE = 2048
@@ -38,24 +38,6 @@ PCP_TYPE = "pcp"
 TONNETZ_TYPE = "tonnetz"
 MFCC_TYPE = "mfcc"
 FEATURE_TYPES = [PCP_TYPE, TONNETZ_TYPE, MFCC_TYPE]
-
-
-def f_measure(precision, recall):
-    """Computes the harmonic mean between precision and recall.
-
-    Parameters
-    ----------
-    precision : float > 0 < 1
-        Precision value.
-    recall : float > 0 < 1
-        Recall value.
-
-    Returns
-    -------
-    f_measure : float > 0 < 1
-        Harmonic mean between precision and recall.
-    """
-    return 2 * precision * recall / (precision + recall)
 
 
 def compute_beats(y_percussive, sr):
@@ -349,7 +331,7 @@ def find_optimal_summary(sequence, P, N, L=None):
         d = compute_disjoint_information(summary, L)
         compressions[idx] = c
         disjoints[idx] = d
-        criteria[idx] = f_measure(c, d)
+        criteria[idx] = utils.f_measure(c, d)
 
     summary_idxs = np.unravel_index(criteria.argmax(), criteria.shape)
     #six.print_(summary_idxs)
@@ -392,48 +374,38 @@ def synth_summary(audio, beats, summary_idxs, N, fade=2):
 
     summary = np.empty(0)
     for i, idx in enumerate(summary_idxs):
-        # Subsequence times
-        start_time = beats[idx]
-        end_time = beats[idx+N]
-        start_end_samples = librosa.time_to_samples(np.array([start_time,
-                                                              end_time]),
-                                                    sr=SAMPLING_RATE)
+        # Create Subsequence
+        subseq = Segment(beats[idx], beats[idx + N], sr=SAMPLING_RATE)
 
-        # Cross fade times
-        fade_in_start_time = beats[np.max([0, idx - fade / 2])]
-        fade_in_end_time = beats[np.min([n - 1, idx + fade / 2])]
-        fade_out_start_time = beats[np.max([0, idx + N - fade / 2])]
-        fade_out_end_time = beats[np.min([n - 1, idx + N + fade / 2])]
+        # Create cross fade segments
+        fade_in_seg = Segment(beats[np.max([0, idx - fade / 2])],
+                              beats[np.min([n - 1, idx + fade / 2])],
+                              sr=SAMPLING_RATE)
+        fade_out_seg = Segment(beats[np.max([0, idx + N - fade / 2])],
+                              beats[np.min([n - 1, idx + N + fade / 2])],
+                              sr=SAMPLING_RATE)
 
-        # Cass fade times in samples
-        fade_in_start_end_samples = librosa.time_to_samples(
-            np.array([fade_in_start_time, fade_in_end_time]),
-            sr=SAMPLING_RATE)
-        fade_out_start_end_samples = librosa.time_to_samples(
-            np.array([fade_out_start_time, fade_out_end_time]),
-            sr=SAMPLING_RATE)
-
-        # Create fade in
-        Fi = fade_in_start_end_samples[1] - fade_in_start_end_samples[0]
-        fade_in_mask = np.arange(Fi) / float(Fi)
+        # Create fade in audio
+        fade_in_mask = np.arange(fade_in_seg.n_samples) / \
+            float(fade_in_seg.n_samples)
         fade_in = \
-            audio[fade_in_start_end_samples[0]:fade_in_start_end_samples[1]] * \
+            audio[fade_in_seg.start_sample:fade_in_seg.end_sample] * \
             fade_in_mask
 
-        # Create fade out
-        Fo = fade_out_start_end_samples[1] - fade_out_start_end_samples[0]
-        fade_out_mask = np.arange(Fo) / float(Fo)
+        # Create fade out audio
+        fade_out_mask = np.arange(fade_out_seg.n_samples) / \
+            float(fade_out_seg.n_samples)
         fade_out = \
-            audio[fade_out_start_end_samples[0]:fade_out_start_end_samples[1]] \
+            audio[fade_out_seg.start_sample:fade_out_seg.end_sample] \
             * fade_out_mask
 
         if i == 0:
             summary = fade_in
         else:
-            summary[-Fi:] += fade_in
+            summary[-fade_in_seg.n_samples:] += fade_in
 
         summary = np.concatenate((
-            summary, audio[start_end_samples[0]:start_end_samples[1]]))
+            summary, audio[subseq.start_sample:subseq.end_sample]))
 
     return summary
 
@@ -477,7 +449,7 @@ def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
 
     # Save file if needed
     if out_file is not None:
-        wavfile.write(out_file, main.SAMPLING_RATE, summary)
+        wavfile.write(out_file, SAMPLING_RATE, summary)
 
     return summary
 
