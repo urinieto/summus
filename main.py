@@ -369,7 +369,6 @@ def synth_summary(audio, beats, summary_idxs, N, fade=2):
     # Sanity checks
     assert fade % 2 == 0
 
-    #TODO: cross-fade
     n = len(audio)
 
     summary = np.empty(0)
