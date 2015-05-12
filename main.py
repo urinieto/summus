@@ -363,7 +363,7 @@ def find_optimal_summary(sequence, P, N, L=None):
     return summary_idxs
 
 
-def synth_summary(audio, beats, summary_idxs, N, fade=1):
+def synth_summary(audio, beats, summary_idxs, N, fade=2):
     """Synthesize the audio summary.
 
     Parameters
@@ -384,14 +384,54 @@ def synth_summary(audio, beats, summary_idxs, N, fade=1):
     summary : np.array
         Samples of the summary, sampled at SAMPLING_RATE.
     """
+    # Sanity checks
+    assert fade % 2 == 0
+
     #TODO: cross-fade
+    n = len(audio)
+
     summary = np.empty(0)
-    for idx in summary_idxs:
+    for i, idx in enumerate(summary_idxs):
+        # Subsequence times
         start_time = beats[idx]
         end_time = beats[idx+N]
         start_end_samples = librosa.time_to_samples(np.array([start_time,
                                                               end_time]),
                                                     sr=SAMPLING_RATE)
+
+        # Cross fade times
+        fade_in_start_time = beats[np.max([0, idx - fade / 2])]
+        fade_in_end_time = beats[np.min([n - 1, idx + fade / 2])]
+        fade_out_start_time = beats[np.max([0, idx + N - fade / 2])]
+        fade_out_end_time = beats[np.min([n - 1, idx + N + fade / 2])]
+
+        # Cass fade times in samples
+        fade_in_start_end_samples = librosa.time_to_samples(
+            np.array([fade_in_start_time, fade_in_end_time]),
+            sr=SAMPLING_RATE)
+        fade_out_start_end_samples = librosa.time_to_samples(
+            np.array([fade_out_start_time, fade_out_end_time]),
+            sr=SAMPLING_RATE)
+
+        # Create fade in
+        Fi = fade_in_start_end_samples[1] - fade_in_start_end_samples[0]
+        fade_in_mask = np.arange(Fi) / float(Fi)
+        fade_in = \
+            audio[fade_in_start_end_samples[0]:fade_in_start_end_samples[1]] * \
+            fade_in_mask
+
+        # Create fade out
+        Fo = fade_out_start_end_samples[1] - fade_out_start_end_samples[0]
+        fade_out_mask = np.arange(Fo) / float(Fo)
+        fade_out = \
+            audio[fade_out_start_end_samples[0]:fade_out_start_end_samples[1]] \
+            * fade_out_mask
+
+        if i == 0:
+            summary = fade_in
+        else:
+            summary[-Fi:] += fade_in
+
         summary = np.concatenate((
             summary, audio[start_end_samples[0]:start_end_samples[1]]))
 
