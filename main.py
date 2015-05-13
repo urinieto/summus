@@ -376,14 +376,14 @@ def find_heur_summary(sequence, P, N, L=None):
     # Make sure that our summary has the right amount of subsequences
     assert len(summary_idxs) == P
 
-    # For each subsequence
+    # For each subsequence, move it until finding the max
     for i, start_idx in enumerate(summary_idxs):
         if i == 0:
             start_idx = 0
         if i == P - 1:
-            end_idx = M
+            end_idx = M - N
         else:
-            end_idx = summary_idxs[i + 1]
+            end_idx = summary_idxs[i + 1] - N
         for curr_idx in np.arange(start_idx, end_idx):
             summary_idxs[i] = curr_idx
             summary = sequence[summary_idxs]
