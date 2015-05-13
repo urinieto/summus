@@ -214,6 +214,33 @@ def compute_disjoint_information(summary, L):
     return disjoint
 
 
+def compute_summary_criterion(sequence, summary, L):
+    """Computes the music summary criterion.
+
+    Parameters
+    ----------
+    sequence : np.array((M, n_features))
+        Sequence of features.
+    summary : list
+        List of P np.arrays of shape(N, n_features)
+    L : int > 0 < N
+        The length of each shingle.
+
+    Returns
+    -------
+    criterion : float >= 0
+        The music summary criterion
+    compression : float >= 0
+        The compression measure
+    disjoint : float >= 0
+        The disjoint information measure
+    """
+    compression = compute_compression_measure(sequence, summary)
+    disjoint = compute_disjoint_information(summary, L)
+    criterion = utils.f_measure(compression, disjoint)
+    return criterion, compression, disjoint
+
+
 def make_shingles(subsequence, L):
     """Transforms the given subsequence into a list of L-length shingles.
 
@@ -327,11 +354,8 @@ def find_optimal_summary(sequence, P, N, L=None):
     # Compute measures
     for comb, idx in zip(combs, combs_idxs):
         summary = list(comb)
-        c = compute_compression_measure(sequence, summary)
-        d = compute_disjoint_information(summary, L)
-        compressions[idx] = c
-        disjoints[idx] = d
-        criteria[idx] = utils.f_measure(c, d)
+        compressions[idx], disjoints[idx], criteria[idx] = \
+            compute_summary_criterion(sequence, summary, L)
 
     summary_idxs = np.unravel_index(criteria.argmax(), criteria.shape)
     #six.print_(summary_idxs)
@@ -369,6 +393,8 @@ def find_heur_summary(sequence, P, N, L=None):
     assert len(sequence) >= P * N
 
     M = len(sequence)
+    if L == None:
+        L = int(N / 2)
 
     # Initial positions of ths subsequences, uniformly spread
     summary_idxs = np.round(np.arange(0, M, M / float(P) / 2.0)[1::2] - N)
@@ -387,7 +413,6 @@ def find_heur_summary(sequence, P, N, L=None):
         for curr_idx in np.arange(start_idx, end_idx):
             summary_idxs[i] = curr_idx
             summary = sequence[summary_idxs]
-            # TODO: Compute criterion
 
     return summary_idxs
 
