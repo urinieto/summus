@@ -307,7 +307,7 @@ def find_optimal_summary(sequence, P, N, L=None):
         List of indeces of starting points of the summary.
     """
     # Sanity checks
-    assert len(sequence) > N
+    assert len(sequence) >= P * N
 
     M = len(sequence)
 
@@ -344,6 +344,38 @@ def find_optimal_summary(sequence, P, N, L=None):
 
     return summary_idxs
 
+
+def find_heur_summary(sequence, P, N, L=None):
+    """Identifies the summary of the given sequence using the heuristic
+    approach.
+
+    Parameters
+    ----------
+    sequence : np.array(M, n_features)
+        Representation of the audio track.
+    P : int > 0
+        Number of subsequences in the summary.
+    N : int > 0
+        Numnber of beats per subsequence.
+    L : int > 0 < N
+        Length of the shingles (If None, L = N / 2)
+
+    Returns
+    -------
+    summary_idxs : list (len == P)
+        List of indeces of starting points of the summary.
+    """
+    # Sanity checks
+    assert len(sequence) >= P * N
+
+    M = len(sequence)
+
+    # Initial positions of ths subsequences, uniformly spread
+    summary_idxs = np.round(np.arange(0, M, M / float(P) / 2.0)[1::2] - N)
+
+    # For each subsequence
+
+    return summary_idxs
 
 def synth_summary(audio, beats, summary_idxs, N, fade=2):
     """Synthesize the audio summary.
