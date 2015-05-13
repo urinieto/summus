@@ -393,7 +393,7 @@ def find_heur_summary(sequence, P, N, L=None):
     assert len(sequence) >= P * N
 
     M = len(sequence)
-    if L == None:
+    if L is None:
         L = int(N / 2)
 
     # Initial positions of ths subsequences, uniformly spread
@@ -404,15 +404,29 @@ def find_heur_summary(sequence, P, N, L=None):
 
     # For each subsequence, move it until finding the max
     for i, start_idx in enumerate(summary_idxs):
+        # Set start and end points
         if i == 0:
             start_idx = 0
         if i == P - 1:
             end_idx = M - N
         else:
             end_idx = summary_idxs[i + 1] - N
+
+        # Find maximum criterion for current index
+        max_criterion = 0
+        max_idx = 0
         for curr_idx in np.arange(start_idx, end_idx):
             summary_idxs[i] = curr_idx
-            summary = sequence[summary_idxs]
+            # TODO: Construct summary correctly
+            summary = sequence[np.array(summary_idxs, dtype=int)]
+            criterion, compression, disjoint = \
+                compute_summary_criterion(sequence, summary, L)
+            if criterion > max_criterion:
+                max_criterion = criterion
+                max_idx = curr_idx
+
+        # Update summary indeces
+        summary_idxs[i] = max_idx
 
     return summary_idxs
 
@@ -508,8 +522,7 @@ def generate_summary(audio_file, P=3, N=16, L=None, feature_type=PCP_TYPE,
     if opt:
         summary_idxs = find_optimal_summary(features["bs_sequence"], P, N, L)
     else:
-        #TODO
-        pass
+        summary_idxs = find_heur_summary(features["bs_sequence"], P, N, L)
 
     # Synthesize summary
     summary = synth_summary(audio, features["beats"], summary_idxs, N)
