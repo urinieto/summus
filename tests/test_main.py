@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Unit Tests for the Music Summaries code."""
 
-import librosa
 import numpy as np
 import os
 import six
@@ -51,6 +50,7 @@ def test_find_optimal_summary():
     sequence = np.arange(M * n_features).reshape(M, n_features)
     #sequence = np.random.random((M, n_features))
     main.find_optimal_summary(sequence, P, N, L=L)
+
 
 def test_disjoint_information():
     L = 3
