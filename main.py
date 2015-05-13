@@ -373,9 +373,24 @@ def find_heur_summary(sequence, P, N, L=None):
     # Initial positions of ths subsequences, uniformly spread
     summary_idxs = np.round(np.arange(0, M, M / float(P) / 2.0)[1::2] - N)
 
+    # Make sure that our summary has the right amount of subsequences
+    assert len(summary_idxs) == P
+
     # For each subsequence
+    for i, start_idx in enumerate(summary_idxs):
+        if i == 0:
+            start_idx = 0
+        if i == P - 1:
+            end_idx = M
+        else:
+            end_idx = summary_idxs[i + 1]
+        for curr_idx in np.arange(start_idx, end_idx):
+            summary_idxs[i] = curr_idx
+            summary = sequence[summary_idxs]
+            # TODO: Compute criterion
 
     return summary_idxs
+
 
 def synth_summary(audio, beats, summary_idxs, N, fade=2):
     """Synthesize the audio summary.
