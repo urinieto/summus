@@ -398,6 +398,7 @@ def find_heur_summary(sequence, P, N, L=None):
 
     # Initial positions of ths subsequences, uniformly spread
     summary_idxs = np.round(np.arange(0, M, M / float(P) / 2.0)[1::2] - N)
+    summary_idxs = np.asarray(summary_idxs, dtype=int)
 
     # Make sure that our summary has the right amount of subsequences
     assert len(summary_idxs) == P
@@ -417,8 +418,12 @@ def find_heur_summary(sequence, P, N, L=None):
         max_idx = 0
         for curr_idx in np.arange(start_idx, end_idx):
             summary_idxs[i] = curr_idx
-            # TODO: Construct summary correctly
-            summary = sequence[np.array(summary_idxs, dtype=int)]
+            # Construct summary correctly
+            summary = []
+            for idx in summary_idxs:
+                summary.append(sequence[idx:idx + N])
+
+            # Compute criterion
             criterion, compression, disjoint = \
                 compute_summary_criterion(sequence, summary, L)
             if criterion > max_criterion:
