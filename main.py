@@ -408,6 +408,8 @@ def find_heur_summary(sequence, P, N, L=None):
         # Set start and end points
         if i == 0:
             start_idx = 0
+        else:
+            start_idx = summary_idxs[i - 1] + N
         if i == P - 1:
             end_idx = M - N
         else:
