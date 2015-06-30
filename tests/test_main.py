@@ -3,6 +3,7 @@
 
 import numpy as np
 import os
+import pickle
 import six
 import sys
 
@@ -15,6 +16,22 @@ import utils
 
 AUDIO_DIR = os.path.join("..", "audio")
 
+
+#def test_compression_measure2():
+    ## Check that a toy example actually returns perfect compression
+    #audio_file = os.path.join(AUDIO_DIR, "rhapsody.mp3")
+    #features, audio = main.compute_features(audio_file, main.PCP_TYPE)
+    #with open("summary.pk") as f:
+        #summary = pickle.load(f)
+
+    ##import matplotlib.pyplot as plt
+    ##for sum in summary:
+        ##plt.imshow(sum, interpolation="nearest", aspect="equal")
+        ##plt.show()
+    #import pdb; pdb.set_trace()  # XXX BREAKPOINT
+    #compression = main.compute_compression_measure(features["bs_sequence"],
+                                                   #summary)
+    #print compression
 
 def test_find_heur_summary():
     # Get audio

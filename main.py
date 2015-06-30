@@ -152,6 +152,7 @@ def compute_compression_measure(sequence, summary):
 
     # Get the fixed parameters
     P = len(summary)
+    F = summary[0].shape[1]
     N = summary[0].shape[0]
     M = sequence.shape[0]
     J = M - N + 1
@@ -166,7 +167,7 @@ def compute_compression_measure(sequence, summary):
         for i in np.arange(J):
             subsequence = sequence[i:i + N, :]
             X = np.vstack((gamma.flatten(), subsequence.flatten()))
-            dist += distance.pdist(X, metric="sqeuclidean")[0] / float(N)
+            dist += distance.pdist(X, metric="sqeuclidean")[0] / float(N * F)
 
     # Normalize and transform to similarity
     return 1 - dist / float(P * J)
@@ -396,8 +397,9 @@ def find_heur_summary(sequence, P, N, L=None):
     if L is None:
         L = int(N / 2)
 
-    # Initial positions of ths subsequences, uniformly spread
-    summary_idxs = np.round(np.arange(0, M, M / float(P) / 2.0)[1::2] - N)
+    # Initial positions of the subsequences, uniformly spread
+    summary_idxs = np.round(np.arange(0, M,
+                                      M / float(P) / float(2.0))[1::2] - N)
     summary_idxs = np.asarray(summary_idxs, dtype=int)
 
     # Make sure that our summary has the right amount of subsequences
