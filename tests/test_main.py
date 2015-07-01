@@ -38,10 +38,10 @@ def test_find_heur_summary():
     audio_file = os.path.join(AUDIO_DIR, "mindless.ogg")
     audio_file = os.path.join(AUDIO_DIR, "mindless-full.ogg")
     audio_file = os.path.join(AUDIO_DIR, "rhapsody.mp3")
-    features, audio = main.compute_features(audio_file, main.PCP_TYPE)
+    features, audio = main.compute_features(audio_file, main.MFCC_TYPE)
 
     # Generate random summary
-    P = 3
+    P = 5
     N = 16
     L = 8
     fade = 2

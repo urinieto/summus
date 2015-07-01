@@ -71,3 +71,21 @@ def generate_fade_audio(fade_seg, audio, is_out):
     if is_out:
         mask = 1 - mask
     return audio[fade_seg.start_sample:fade_seg.end_sample] * mask
+
+
+def normalize(X):
+    """Normalizes X such that each elemnts resides in the range of 1 to 0.
+
+    Parameters
+    ----------
+    X : np.array
+        Array containing the values to be normalized.
+
+    Returns
+    -------
+    X_norm : np.array
+        Normalized array.
+    """
+    X += np.abs(X.min())
+    X /= X.max()
+    return X

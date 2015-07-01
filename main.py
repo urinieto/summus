@@ -115,6 +115,9 @@ def compute_features(audio_file, type=PCP_TYPE):
         log_S = librosa.logamplitude(S, ref_power=np.max)
         features["sequence"] = librosa.feature.mfcc(S=log_S, n_mfcc=N_MFCCS).T
 
+    # Normalize sequence
+    features["sequence"] = utils.normalize(features["sequence"])
+
     #plt.imshow(hpcp.T, interpolation="nearest", aspect="auto"); plt.show()
 
     # Estimate Beats
